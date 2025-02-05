@@ -5,6 +5,10 @@ const regd_users = express.Router();
 
 let users = [];
 
+const addUser = (username, password) => {
+    users.push({username, password});
+}
+
 const isValid = (username)=>{ //returns boolean
 //write code to check is the username is valid
 }
@@ -27,4 +31,5 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
 
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;
+module.exports.addUser = addUser;
 module.exports.users = users;
