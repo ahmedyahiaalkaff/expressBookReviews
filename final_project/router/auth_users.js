@@ -6,7 +6,6 @@ const regd_users = express.Router();
 let users = [];
 
 const addUser = (username, password) => {
-    console.log(users);
     if(!isValid(username)){
         users.push({username, password});
         return true;
@@ -64,6 +63,17 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
     const username = req.session.username;
     bookReviews[username] = review;
     res.json({message: `Review added to book ${req.params.isbn}`});
+});
+
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+    const book = books[req.params.isbn];
+    if(!book){
+        return res.status(404).json({message: 'Book not found'});
+    }
+    const username = req.session.username;
+    const bookReviews = book.reviews;
+    delete bookReviews[username];
+    res.json({message: `Review deleted to book ${req.params.isbn}`});
 });
 
 module.exports.authenticated = regd_users;

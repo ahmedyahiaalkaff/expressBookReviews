@@ -13,50 +13,79 @@ public_users.post("/register", (req,res) => {
     }
     
     if(addUser(username, password)){
-        console.log("not equal in register")
         return res.status(201).send();    
     }
     return res.status(400).json({message: 'user already exists'});
 });
 
+const getBooks = ()=>{
+    return new Promise((resolve, reject)=>{
+        try{
+            resolve(books);
+        }catch(error){
+            reject(error);
+        }
+    });
+}
+
 // Get the book list available in the shop
 public_users.get('/',function (req, res) {
-    return res.json(books);
+    getBooks().then((books)=>{
+        return res.json(books);
+    }).catch((error)=>{
+        console.log("Error "+error);
+        return res.status(500).json({message: 'Error retrieving books'});
+    })
 });
 
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn',function (req, res) {
-  const book = books[req.params.isbn];
-  if(!book){
-    return res.status(404).json({message: "Book Not Found"});
-  }
-  return res.json(book);
+    getBooks().then((books)=>{
+        const book = books[req.params.isbn];
+        if(!book){
+            return res.status(404).json({message: "Book Not Found"});
+        }
+        return res.json(book);
+    }).catch((error)=>{
+        console.log("Error "+error);
+        return res.status(500).json({message: "Error Retrieving book"});
+    })
  });
  
 
 const searchBooks = (key, value) => {
-    const result = {};
-    Object.keys(books).forEach((bookKey)=>{
-        const book = books[bookKey];
-        if(book[key] === value){
-            result[bookKey] = book;
-        }
+    return new Promise((resolve, reject)=>{
+        const result = {};
+        Object.keys(books).forEach((bookKey)=>{
+            const book = books[bookKey];
+            if(book[key] === value){
+                result[bookKey] = book;
+            }
+        })
+        resolve(result);
     })
-    return result;
 }
  
 // Get book details based on author
 public_users.get('/author/:author',function (req, res) {
   const author = req.params.author;
-  const result = searchBooks('author', author);
-  return res.json(result);
+  searchBooks('author', author).then((result)=>{
+    return res.json(result);
+  }).catch((error)=>{
+    console.log("Error "+error);
+    return res.status(500).json({message: 'Error searching for books'});
+  });
 });
 
 // Get all books based on title
 public_users.get('/title/:title',function (req, res) {
     const title = req.params.title;
-    const result = searchBooks('title', title);
-    return res.json(result);
+    searchBooks('title', title).then((result)=>{
+        return res.json(result);
+    }).catch((error)=>{
+        console.log("Error "+error);
+        return res.status(500).json({message: 'Error searching for books'});
+    });
 });
 
 //  Get book review
