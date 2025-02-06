@@ -11,13 +11,12 @@ public_users.post("/register", (req,res) => {
     if(!username || !password){
         return res.status(400).json({message: "provide username and password"});
     }
-    users.forEach((user)=>{
-        if(user.username === username){
-            return res.status(400).json({message: "username already exists"});
-        }
-    })
-    addUser(username, password);
-    return res.status(201).send();
+    
+    if(addUser(username, password)){
+        console.log("not equal in register")
+        return res.status(201).send();    
+    }
+    return res.status(400).json({message: 'user already exists'});
 });
 
 // Get the book list available in the shop

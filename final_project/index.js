@@ -12,15 +12,18 @@ app.use(express.json());
 app.use("/customer",session({secret:"fingerprint_customer",resave: true, saveUninitialized: true}))
 
 app.use("/customer/auth/*", function auth(req,res,next){
-    if(req.session){
-        jwt.verify(req.session.accessToken, (err, decoded)=>{
-            if(err || !isValid(decoded)){
-                return res.status(401).send("you need to login first");
+    if(req.session.accessToken){
+        try {
+            let decoded = jwt.verify(req.session.accessToken, 'secret');
+            if(req.session.username !== decoded.username){
+                return res.status(401).json({message: "you need to login first"});
             }
             next();
-        });
+        } catch(err) {
+            return res.status(401).json({message: "you need to login first"});
+        }
     }else{
-        res.status(401).send("you need to login first");
+        res.status(401).json({message: "you need to login first"});
     }
 });
  
